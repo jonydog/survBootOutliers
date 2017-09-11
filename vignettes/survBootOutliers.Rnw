@@ -50,7 +50,7 @@ outliers_bht <- survBootOutliers(
     surv.object=survival::Surv(time = whas$times,event = whas$status ),
     covariate.data = whas[,2:5],
     sod.method = "bht",
-    B = 100,
+    B = 10,
     B.N = 100,
     parallel.param = SnowParam() )
 print(outliers_bht)
@@ -64,7 +64,7 @@ outliers_dbht <- survBootOutliers(
     surv.object=Surv(time = whas$times,event = whas$status ),
     covariate.data = whas[,2:5],
     sod.method = "dbht",
-    B = 100,
+    B = 10,
     B.N = 100,
     parallel.param = SnowParam() 
 )

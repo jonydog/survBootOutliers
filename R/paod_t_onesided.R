@@ -13,12 +13,12 @@ pvalue_poison_antidote_t <- function(hist_lower, hist_higher) {
   print(hist1)
   print(hist2)
   #
-  T <- t.test(x = hist2 ,
+  test_done <- t.test(x = hist2 ,
               y = hist1,
               alternative = "greater")
   
   ## for large sample T follows standard normal distribution
-  return(T$p.value)
+  return(test_done$p.value)
 }
 
 

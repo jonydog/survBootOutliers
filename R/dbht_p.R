@@ -6,8 +6,6 @@
 ##
 dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
   
-  library('survival')
-  
   actual_data <- cbind( covariate.data , s[,1] , s[,2] )
   time_index   <- ncol(actual_data) - 1
   status_index <- ncol(actual_data)  
