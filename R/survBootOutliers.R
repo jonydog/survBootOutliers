@@ -21,15 +21,16 @@
 #' 
 #' @examples ## One Step Deletion "osd" method
 #' whas <- get.whas100.dataset()
+#' print(getwd())
 #' outliers_osd <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "osd" , max.outliers = 10 )
 #' 
-#' @examples ## Bootstrap Hypothesis Test "bht" with 3000 bootstrap samples, each with 100 individuals and running on 4 cores
+#' @examples ## Bootstrap Hypothesis Test "bht" with 100 bootstrap samples, each with 100 individuals and running on 4 cores
 #' whas <- get.whas100.dataset()
-#' outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 3000 , B.N = 100 , parallel.param = MulticoreParam() )
+#' outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 100 , B.N = 100 , parallel.param = MulticoreParam() )
 #' 
-#' @examples ## Dual Bootstrap Hypothesis Test "dbht" with 3000 bootstrap samples, each with 100 individuals and running on 4 cores
+#' @examples ## Dual Bootstrap Hypothesis Test "dbht" with 100 bootstrap samples, each with 100 individuals and running on 4 cores
 #' whas <- get.whas100.dataset()
-#' outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100 , parallel.param = SnowParam() )
+#' outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 100 , B.N = 100 , parallel.param = SnowParam() )
 #' 
 #' @examples ## One Step Deletion "osd" with an amount of 10 for maximum outlier count
 #' whas <- get.whas100.dataset()
@@ -50,13 +51,19 @@
 #' @import survival
 #' @import stats
 #' @export
-survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=SerialParam() ){
+survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=BiocParallel::SerialParam() ){
   
   ## load library dependencies
   library(stats)
   library(survival)
-  library(BiocParallel)
- 
+  
+  if( requireNamespace("BiocParallel", quietly = TRUE) ){
+    library(BiocParallel);
+    HAS_BIOCPARALLEL = TRUE;
+  } else {
+    HAS_BIOCPARALLEL = FALSE;
+  }
+  
   # if( mc.cores > 1){
   #   if( Sys.info()['sysname']=='Windows' ){
   #     library(parallelsugar)
@@ -65,18 +72,17 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   #   }
   # }
 
-  if( ! is.Surv(surv.object) ){
+  if( ! survival::is.Surv(surv.object) ){
     
     stop("Parameter \"surv.object\" must be an object of type \"survival::Surv\" ")
 }
   
-  if( ! is.data.frame(covariate.data) ){
+  if( ! base::is.data.frame(covariate.data) ){
     
     stop("Parameter \"covariate.data\" must be of type \"data.frame\".")
   } 
   
   if( ! is(parallel.param,"BiocParallelParam") ){
-    
     stop("Parameter \"parallel.param\" must be of type \"BiocParallelParam\".")
   }
   
@@ -91,8 +97,12 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   }
   
   if( sod.method=="bht" ){  
-    
-    outlier_set <- bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, BPPARAM = parallel.param )
+      
+    if(HAS_BIOCPARALLEL){
+      outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, BPPARAM = parallel.param )
+    }  else {
+      outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, BPPARAM = BiocParallel::SerialParam() )
+    }
     ## unlist to matrix and sort by pvalue
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 4, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","avg_delta","max_delta","pvalue")
@@ -103,7 +113,7 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
 
   if(sod.method=="dbht" ){    
     
-    outlier_set <- bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
+    outlier_set <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 2, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","pvalue")
     set_sorted  <- outlier_set_flat[order(outlier_set_flat[,2]),]

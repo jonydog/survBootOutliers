@@ -5,12 +5,13 @@
 \SweaveOpts{concordance=TRUE}
 
 \title{survBootOutliers: An R package for outlier detection in survival analysis}
-\author{João Diogo Pinto, joao.pinto@tecnico.ulisboa.pt}
+\author{Joao Diogo Pinto, joao.pinto@tecnico.ulisboa.pt}
 
 \maketitle
 
 \tableofcontents
 
+%\VignetteIndexEntry{Introduction}
 \section{Introduction}
 This  package provides three new outlier detection methods to perform outlier detection in a survival analysis context. The first  method OSD, for One Step Deletion, is a sequential procedure that maximizes the c-index of a fitted Cox regression using a a greedy one-step-ahead search, in each step the observation that when removed maximizes the concordance increase is permanently deleted from the dataset, the algorithm ends until k observations are removed, these are considered the most outlying ones. The second and third methods are based on bootstrap methods. The second method BHT, for Bootstrap Hypothesis Testing, is based on creating B bootstrap samples for each observation that is removed from the dataset, then an hypothesis test is made for the B concordance variations to be larger than zero, the observations with the lowest p-values are considered the most outlying. The last method DBHT, for Dual Bootstrap Hypothesis Testing, draws 2B bootstrap samples for each observation, B samples with each observation absent, just like with BHT, the other B bootstrap samples are drawn with the observation under test being deliberately inserted in each of the bootstrap samples. The hypothesis test is different, the two histograms are tested for inequality, for non-outlying observations the histograms are expected to be similar but for outlying observtions the histograms drawn when the observation is absent is expected to have higher concordance on average.
 
@@ -27,6 +28,7 @@ whas100_data <-  get.whas100.dataset()
 summary(whas100_data)
 @
 
+%\VignetteIndexEntry{Examples}
 \section{Examples}
 
 \subsection{OSD}
@@ -34,7 +36,7 @@ summary(whas100_data)
 <<eval= TRUE , echo=TRUE>>=
 whas <- get.whas100.dataset()
 outliers_osd <- survBootOutliers( 
-    surv.object=Surv(time = whas$times,event = whas$status ),
+    surv.object=survival::Surv(time = whas$times,event = whas$status ),
     covariate.data = whas[,2:5] , sod.method = "osd",
     max.outliers = 10 )
 print(outliers_osd)
@@ -45,7 +47,7 @@ print(outliers_osd)
 <<eval= TRUE , echo=TRUE>>=
 whas <- get.whas100.dataset()
 outliers_bht <- survBootOutliers( 
-    surv.object=Surv(time = whas$times,event = whas$status ),
+    surv.object=survival::Surv(time = whas$times,event = whas$status ),
     covariate.data = whas[,2:5],
     sod.method = "bht",
     B = 100,

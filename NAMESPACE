@@ -2,7 +2,6 @@
 
 export(get.whas100.dataset)
 export(survBootOutliers)
-import(stats)
-import(survival)
 importFrom(stats,t.test)
 importFrom(survival,coxph)
+importFrom("utils", "read.csv2")

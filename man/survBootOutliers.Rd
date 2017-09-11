@@ -4,8 +4,7 @@
 \alias{survBootOutliers}
 \title{Extract the most outlying observations following a criteria based on the bootstrapped concordance with parallel processing}
 \usage{
-survBootOutliers(surv.object, covariate.data, sod.method, B, B.N, max.outliers,
-  parallel.param = SerialParam())
+survBootOutliers(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param )
 }
 \arguments{
 \item{surv.object}{An obect of type survival::Surv containing lifetimes and right-censoring status}
@@ -20,7 +19,8 @@ survBootOutliers(surv.object, covariate.data, sod.method, B, B.N, max.outliers,
 
 \item{max.outliers}{This parameter is only used for the "osd" method}
 
-\item{mc.cores}{The number of cores to execute the methods "bht" and "dbht"}
+\item{parallel.param}{This parameter is of type BiocParallelParam, by default it has the value of SerialParam()}
+
 }
 \value{
 A data.frame containing the most outlying observations sorted by outlying score
@@ -33,13 +33,13 @@ Extract the most outlying observations following a criteria based on the bootstr
 whas <- get.whas100.dataset()
 outliers_osd <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "osd" , max.outliers = 10 )
 
-## Bootstrap Hypothesis Test "bht" with 3000 bootstrap samples, each with 100 individuals and running on 4 cores
+## Bootstrap Hypothesis Test "bht" with 100 bootstrap samples, each with 100 individuals and running on 4 cores
 whas <- get.whas100.dataset()
-outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 3000 , B.N = 100 , parallel.param = MulticoreParam() )
+outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 100 , B.N = 100 , parallel.param = MulticoreParam() )
 
 ## Dual Bootstrap Hypothesis Test "dbht" with 3000 bootstrap samples, each with 100 individuals and running on 4 cores
 whas <- get.whas100.dataset()
-outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100 , parallel.param = SnowParam() )
+outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 100 , B.N = 100 , parallel.param = SnowParam() )
 
 ## One Step Deletion "osd" with an amount of 10 for maximum outlier count
 whas <- get.whas100.dataset()
