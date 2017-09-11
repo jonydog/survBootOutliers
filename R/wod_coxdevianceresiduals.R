@@ -14,7 +14,7 @@ wod_coxdevianceresiduals <- function(surv.object , covariate.data ){
   cox_object  <- coxph( Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
   
   
-  ress <- resid(cox_object,type="deviance")
+  ress <- stats::resid(cox_object,type="deviance")
   ress <- data.frame(cbind(1:length(ress), abs(ress) ) )
   ordered_ress <- ress[ order( -ress[,2]) , ]
 

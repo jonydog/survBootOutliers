@@ -13,11 +13,11 @@ wod_coxmartingaleresiduals <- function(surv.object , covariate.data ){
   time_index   <- ncol(actual_data) - 1
   status_index <- ncol(actual_data) 
   
-  cox_object  <- coxph( Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object  <- survival::coxph( Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
   
   
   
-  ress <- resid(cox_object,type="martingale")
+  ress <- stats::resid(cox_object,type="martingale")
   ress <- data.frame(cbind(1:length(ress), abs(ress) ) )
   ordered_ress <- ress[ order( -ress[,2]) , ]
   

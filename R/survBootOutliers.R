@@ -54,8 +54,8 @@
 survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=BiocParallel::SerialParam() ){
   
   ## load library dependencies
-  library(stats)
-  library(survival)
+  #library(stats)
+  #library(survival)
   
   if( requireNamespace("BiocParallel", quietly = TRUE) ){
     library(BiocParallel);
@@ -82,7 +82,7 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
     stop("Parameter \"covariate.data\" must be of type \"data.frame\".")
   } 
   
-  if( ! is(parallel.param,"BiocParallelParam") ){
+  if( ! methods::is(parallel.param,"BiocParallelParam") ){
     stop("Parameter \"parallel.param\" must be of type \"BiocParallelParam\".")
   }
   
@@ -101,7 +101,7 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
     if(HAS_BIOCPARALLEL){
       outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, BPPARAM = parallel.param )
     }  else {
-      outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, BPPARAM = BiocParallel::SerialParam() )
+      outlier_set <- lapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N )
     }
     ## unlist to matrix and sort by pvalue
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 4, byrow = TRUE) 
@@ -113,7 +113,12 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
 
   if(sod.method=="dbht" ){    
     
-    outlier_set <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
+    if(HAS_BIOCPARALLEL){
+      outlier_set <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
+    }
+    else {
+      outlier_set <- lapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N)
+    }
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 2, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","pvalue")
     set_sorted  <- outlier_set_flat[order(outlier_set_flat[,2]),]

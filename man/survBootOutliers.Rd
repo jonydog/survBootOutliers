@@ -33,13 +33,13 @@ Extract the most outlying observations following a criteria based on the bootstr
 whas <- get.whas100.dataset()
 outliers_osd <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "osd" , max.outliers = 10 )
 
-## Bootstrap Hypothesis Test "bht" with 100 bootstrap samples, each with 100 individuals and running on 4 cores
+## Bootstrap Hypothesis Test "bht" with 10 bootstrap samples, each with 100 individuals and running on 4 cores
 whas <- get.whas100.dataset()
-outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 100 , B.N = 100 , parallel.param = MulticoreParam() )
+outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 10 , B.N = 100 , parallel.param = MulticoreParam() )
 
-## Dual Bootstrap Hypothesis Test "dbht" with 3000 bootstrap samples, each with 100 individuals and running on 4 cores
+## Dual Bootstrap Hypothesis Test "dbht" with 10 bootstrap samples, each with 100 individuals and running on 4 cores
 whas <- get.whas100.dataset()
-outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 100 , B.N = 100 , parallel.param = SnowParam() )
+outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100 , parallel.param = SnowParam() )
 
 ## One Step Deletion "osd" with an amount of 10 for maximum outlier count
 whas <- get.whas100.dataset()
@@ -56,5 +56,4 @@ outliers_deviance <- survBootOutliers( surv.object=Surv(time = whas$times,event 
 ## Cox regression Martingale residuals criterion for outlier ranking
 whas <- get.whas100.dataset()
 outliers_martingale <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "martingale")
-
 }

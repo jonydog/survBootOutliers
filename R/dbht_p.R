@@ -2,7 +2,6 @@
 ## DBHT parallel  
 ##
 
-
 ##
 ##
 dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
