@@ -23,7 +23,8 @@ survBootOutliers(surv.object, covariate.data, sod.method, B, B.N, max.outliers, 
 
 }
 \value{
-A data.frame containing the most outlying observations sorted by outlying score
+For all methods, except for "bht" and "dbht", the output is a data.frame object containing the most outlying observations sorted by outlying score.
+For the bootstrap based methods "bht" and "dbht" the output is a list with two elements: "outliers_set" and "histograms".
 }
 \description{
 Extract the most outlying observations following a criteria based on the bootstrapped concordance with parallel processing
