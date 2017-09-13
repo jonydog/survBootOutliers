@@ -1,7 +1,7 @@
 #' @importFrom survival coxph
 #' @importFrom survival Surv
 #' 
-wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
+wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.dt ) {
   
   actual_data <- cbind( covariate.data , s[,1] , s[,2] )
   time_index   <- ncol(actual_data) - 1
@@ -13,11 +13,9 @@ wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
   concs_vector  <- rep(x =  0 , B)
   
   ## calculate the baseline concordance, according to the baseline (all observations)
-  cox_object <- coxph( Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object <- survival::coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
   baseline_concordance <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] )   
   
-  
-  cat("baseline:" , baseline_concordance )
   concordance_sum <- 0
   for ( i in 1:B ){
     boot_datax  <- getBootstrap_K(data = actual_data[-obs_index,], k = B.N )
@@ -37,6 +35,8 @@ wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
     concordance_run <- actual_conc - baseline_concordance
     concordance_sum <- concordance_sum + concordance_run
     concs_vector[i] <- concordance_run
+    
+    set(x = histograms.dt, i = obs_index , j = i , value = concordance_run)
   }
   
   ### cdiagnostics1: avg displacement on  concordance; 2: max concordance

@@ -17,7 +17,9 @@
 #' @param max.outliers This parameter is only used for the "osd" method   
 #' @param mc.cores The number of cores to execute the methods "bht" and "dbht"
 #' 
-#' @return A data.frame containing the most outlying observations sorted by outlying score
+#' @return For all methods except for "bht" and "dbht" the value returned is a data.frame containing the most outlying observations sorted by outlying score.
+#'         For the "bht" method the value returned is a list of two members: "outlier_set": the most outlygin observations sorted by p-values; "histograms": histogram of concordance variation for each observation.
+#'         For the "dbht" method the value returned is a list of two members: "outlier_set": the most outlygin observations sorted by p-values; "histograms": histogrms of concordance for each observations for the two types of bootstap: "poison" and "antidote".
 #' 
 #' @examples ## One Step Deletion "osd" method
 #' whas <- get.whas100.dataset()
@@ -50,6 +52,7 @@
 #'
 #' @import survival
 #' @import stats
+#' @import data.table
 #' @export
 survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=BiocParallel::SerialParam() ){
   
@@ -60,18 +63,11 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   if( requireNamespace("BiocParallel", quietly = TRUE) ){
     library(BiocParallel);
     HAS_BIOCPARALLEL = TRUE;
+    print("BiocParallel detected")
   } else {
     HAS_BIOCPARALLEL = FALSE;
   }
   
-  # if( mc.cores > 1){
-  #   if( Sys.info()['sysname']=='Windows' ){
-  #     library(parallelsugar)
-  #   }else{
-  #     library(parallel)
-  #   }
-  # }
-
   if( ! survival::is.Surv(surv.object) ){
     
     stop("Parameter \"surv.object\" must be an object of type \"survival::Surv\" ")
@@ -98,31 +94,45 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   
   if( sod.method=="bht" ){  
       
+    h_matrix.dt <- data.table( data.frame( matrix(data =  0 ,nrow = N, ncol = B) ) )
+    
     if(HAS_BIOCPARALLEL){
-      outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, BPPARAM = parallel.param )
+      outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, histograms.dt=h_matrix.dt ,  BPPARAM = parallel.param )
     }  else {
-      outlier_set <- lapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N )
+      outlier_set <- lapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, histograms.dt=h_matrix.dt )
     }
     ## unlist to matrix and sort by pvalue
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 4, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","avg_delta","max_delta","pvalue")
     set_sorted  <- outlier_set_flat[order(outlier_set_flat[,4]),] 
     
-    return(set_sorted)
+    combined_output <- list(set_sorted,h_matrix.dt)
+    names(combined_output) <- c("outlier_set","histograms")
+    
+    return(combined_output)
   }
 
   if(sod.method=="dbht" ){    
     
+    h_matrix_poison   <-  data.table( data.frame( matrix( data =  0 ,nrow = N, ncol = B ) ) )
+    h_matrix_antidote <-  data.table( data.frame( matrix( data =  0 ,nrow = N, ncol = B  ) ) )
+    histograms        <-  list(h_matrix_antidote,h_matrix_poison);
+    names(histograms) <-  c("antidote","poison")
+    
     if(HAS_BIOCPARALLEL){
-      outlier_set <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
+      outlier_set <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, histograms.list = histograms, BPPARAM = parallel.param )
     }
     else {
-      outlier_set <- lapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N)
+      outlier_set <- lapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, histograms.list = histograms)
     }
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 2, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","pvalue")
     set_sorted  <- outlier_set_flat[order(outlier_set_flat[,2]),]
-    return(set_sorted)
+    
+    combined_output <- list(set_sorted,histograms)
+    names(combined_output) <- c("outlier_set","histograms")
+    
+    return(combined_output)
   }
 
   if( sod.method=="ld" ){

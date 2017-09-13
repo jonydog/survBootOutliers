@@ -4,7 +4,7 @@
 
 ##
 ##
-dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
+dbht_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.list  ) {
   
   actual_data <- cbind( covariate.data , s[,1] , s[,2] )
   time_index   <- ncol(actual_data) - 1
@@ -16,11 +16,10 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
   poison_concs_vector    <- rep(x =  0 , B)
   
   ## calculate the baseline concordance, according to the baseline (all observations)
-  cox_object <- coxph( Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
-  baseline_concordance <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] )   
+  cox_object <- survival::coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  baseline_concordance <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] )    
   
   
-  cat("baseline:" , baseline_concordance )
   for ( i in 1:B ){
     boot_datax  <- getBootstrap_K(data = actual_data[-obs_index,], k = B.N )
     actual_conc <- coxph.call(boot_data = boot_datax, time_index = time_index , status_index = status_index   )
@@ -37,7 +36,10 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
       next
     }
     antidote_concs_vector[i] <- actual_conc - baseline_concordance
+    
+    histograms.list$antidote[obs_index,i] <- actual_conc - baseline_concordance
   }
+  
 
   for ( i in 1:B ){
     boot_datax  <- getBootstrapBiased_k(data = actual_data , obs_index = obs_index, k = B.N)
@@ -55,7 +57,10 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
       next
     }
     poison_concs_vector[i] <- actual_conc - baseline_concordance
+    
+    histograms.list$poison[obs_index,i] <- actual_conc - baseline_concordance
   }
+  print( paste(B," resamples fit for observation " , obs_index , sep="" ))
   
   
   ##
