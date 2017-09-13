@@ -10,8 +10,8 @@ pvalue_poison_antidote_t <- function(hist_lower, hist_higher) {
   
   #T <- (mean(hist1)-mean(hist2) )/ sqrt( var(hist1)/length(hist1) + var(hist2)/length(hist2)  )
   #
-  print(hist1)
-  print(hist2)
+  #print(hist1)
+  #print(hist2)
   #
   test_done <- t.test(x = hist2 ,
               y = hist1,

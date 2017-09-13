@@ -1,7 +1,7 @@
 #' @importFrom survival coxph
 #' @importFrom survival Surv
 #' 
-wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.dt ) {
+wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
   
   actual_data <- cbind( covariate.data , s[,1] , s[,2] )
   time_index   <- ncol(actual_data) - 1
@@ -35,8 +35,6 @@ wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.dt )
     concordance_run <- actual_conc - baseline_concordance
     concordance_sum <- concordance_sum + concordance_run
     concs_vector[i] <- concordance_run
-    
-    set(x = histograms.dt, i = obs_index , j = i , value = concordance_run)
   }
   
   ### cdiagnostics1: avg displacement on  concordance; 2: max concordance
@@ -59,5 +57,10 @@ wod_4_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.dt )
 
   res <- c(obs_index,obs_influence,obs_max_influence,pvalue)
   names(res) <- c( "obs_id" , "avg_delta","max_delta", "pvalue" )
-  return( res )
+  
+  ## output the p-value and also the associated histogram
+  out_list <- list(res,concs_vector)
+  names(out_list) <- c("metrics","histogram")
+  
+  return( out_list )
 }

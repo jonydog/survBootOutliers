@@ -52,7 +52,6 @@
 #'
 #' @import survival
 #' @import stats
-#' @import data.table
 #' @export
 survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=BiocParallel::SerialParam() ){
   
@@ -94,37 +93,38 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   
   if( sod.method=="bht" ){  
       
-    h_matrix.dt <- data.table( data.frame( matrix(data =  0 ,nrow = N, ncol = B) ) )
-    
     if(HAS_BIOCPARALLEL){
-      outlier_set <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, histograms.dt=h_matrix.dt ,  BPPARAM = parallel.param )
+      bht_output <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N,  BPPARAM = parallel.param )
     }  else {
-      outlier_set <- lapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N, histograms.dt=h_matrix.dt )
+      bht_output <- lapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N )
     }
+    ## extract metrics and histograms
+    outlier_set <- mapply( function(list){ return(list["metrics"]) } , list=bht_output )
+    histograms <- mapply( function(list){ return(list["histogram"]) } , list=bht_output )
+    
     ## unlist to matrix and sort by pvalue
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 4, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","avg_delta","max_delta","pvalue")
     set_sorted  <- outlier_set_flat[order(outlier_set_flat[,4]),] 
     
-    combined_output <- list(set_sorted,h_matrix.dt)
+    combined_output <- list(set_sorted,histograms)
     names(combined_output) <- c("outlier_set","histograms")
-    
+  
     return(combined_output)
   }
 
   if(sod.method=="dbht" ){    
     
-    h_matrix_poison   <-  data.table( data.frame( matrix( data =  0 ,nrow = N, ncol = B ) ) )
-    h_matrix_antidote <-  data.table( data.frame( matrix( data =  0 ,nrow = N, ncol = B  ) ) )
-    histograms        <-  list(h_matrix_antidote,h_matrix_poison);
-    names(histograms) <-  c("antidote","poison")
-    
     if(HAS_BIOCPARALLEL){
-      outlier_set <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, histograms.list = histograms, BPPARAM = parallel.param )
+      dbht_out <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
     }
     else {
-      outlier_set <- lapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, histograms.list = histograms)
+      dbht_out <- lapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N);
     }
+    ## extract metrics and histograms
+    outlier_set <- mapply( function(list){ return(list["metrics"]) } , list=dbht_out )
+    histograms <- mapply( function(list){ return(list["histograms"]) } , list=dbht_out )
+  
     outlier_set_flat <-  matrix(unlist(outlier_set), ncol = 2, byrow = TRUE) 
     colnames(outlier_set_flat) <- c("obs_id","pvalue")
     set_sorted  <- outlier_set_flat[order(outlier_set_flat[,2]),]

@@ -4,7 +4,7 @@
 
 ##
 ##
-dbht_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.list  ) {
+dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
   
   actual_data <- cbind( covariate.data , s[,1] , s[,2] )
   time_index   <- ncol(actual_data) - 1
@@ -37,7 +37,7 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.list 
     }
     antidote_concs_vector[i] <- actual_conc - baseline_concordance
     
-    histograms.list$antidote[obs_index,i] <- actual_conc - baseline_concordance
+   
   }
   
 
@@ -58,7 +58,6 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.list 
     }
     poison_concs_vector[i] <- actual_conc - baseline_concordance
     
-    histograms.list$poison[obs_index,i] <- actual_conc - baseline_concordance
   }
   print( paste(B," resamples fit for observation " , obs_index , sep="" ))
   
@@ -68,6 +67,10 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N , histograms.list 
   ##
   pvalue  <- pvalue_poison_antidote_t(hist_lower = poison_concs_vector , hist_higher = antidote_concs_vector )
   
-  
-  return( c(obs_index,pvalue) )
+  histograms         <- list( antidote_concs_vector , poison_concs_vector);
+  names(histograms)  <- c("antidote","poison");
+  dbht_output        <- list(c(obs_index,pvalue) , histograms );
+  names(dbht_output) <- c("metrics","histograms");
+    
+  return( dbht_output )
 }

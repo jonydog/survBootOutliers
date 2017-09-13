@@ -2,7 +2,7 @@ Title: Concordance based methods for outlier detection in survival analysis
 Maintainer: Joao Pinto <joao.pinto@tecnico.ulisboa.pt>
 Package: survBootOutliers
 Version: 0.99.1
-Depends: R (>= 3.4.0), survival, stats, data.table
+Depends: R (>= 3.4.0), survival, stats
 Imports: methods, utils
 Enhances: BiocParallel
 Author: Joao Pinto <joao.pinto@tecnico.ulisboa.pt>, Andre Verissimo <andre.verissimo@tecnico.ulisboa.pt>, Alexandra Carvalho <alexandra.carvalho@tecnico.ulisboa.pt>, Susana Vinga <susanavinga@tecnico.ulisboa.pt>
