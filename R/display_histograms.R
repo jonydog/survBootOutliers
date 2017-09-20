@@ -25,9 +25,9 @@ display.obs.histogram <- function(histograms, type, obs.index){
     poison_histogram   <- histograms[[obs.index]]$poison
     antidote_histogram <- histograms[[obs.index]]$antidote
     
-    hist(poison_histogram, col=rgb(1,0,0,0.5), breaks = 100 , main='Antidote(blue) and Poison(red)', xlab='c-index variation');
-    hist(antidote_histogram, col=rgb(0,0,1,0.5),  breaks=100, add=T);
-    box()
+    graphics::hist(poison_histogram, col=grDevices::rgb(1,0,0,0.5), breaks = 100 , main='Antidote(blue) and Poison(red)', xlab='c-index variation');
+    graphics::hist(antidote_histogram, col=grDevices::rgb(0,0,1,0.5),  breaks=100, add=TRUE);
+    graphics::box()
   }
   
 }
