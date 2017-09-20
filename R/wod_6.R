@@ -2,8 +2,6 @@
 ##
 ## WOD_6 : Greedy maximization of concordance by greedy one step ahead , remove one observation at a time, 
 ##                                                                       removing the one that improves concordancde the most (estimated without bootstrap)
-##
-##
 
 ## Function wod_4
 ##
@@ -32,7 +30,7 @@ wod_6 <-  function( surv.object, covariate.data ,  max_outliers ) {
   
   ## calculate the baseline concordance, according to the baseline (all observations)
   #
-  cox_object <- coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object <- coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = data.frame(actual_data[,-c(time_index,status_index)])  )
   baseline_concordance <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] )   
 
   ## initialization of index vectors
@@ -50,7 +48,7 @@ wod_6 <-  function( surv.object, covariate.data ,  max_outliers ) {
       
         ## remove one more observation beyond the already removed ones
         #
-        cox_object <- coxph( Surv(actual_data[-c(removed_indexes,left_indexes[i] ),time_index], as.integer(actual_data[-c(removed_indexes,left_indexes[i]),status_index]) ) ~ .   , data = actual_data[-c(removed_indexes,left_indexes[i]),-c(time_index,status_index)] )
+        cox_object <- coxph( Surv(actual_data[-c(removed_indexes,left_indexes[i] ),time_index], as.integer(actual_data[-c(removed_indexes,left_indexes[i]),status_index]) ) ~ .   , data = data.frame(actual_data[-c(removed_indexes,left_indexes[i]),-c(time_index,status_index)] ) )
         
         concordance_run_delta <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] ) - baseline_concordance
       

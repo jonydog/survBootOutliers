@@ -16,7 +16,7 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
   poison_concs_vector    <- rep(x =  0 , B)
   
   ## calculate the baseline concordance, according to the baseline (all observations)
-  cox_object <- survival::coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object <- survival::coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = data.frame(actual_data[,-c(time_index,status_index)]) )
   baseline_concordance <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] )    
   
   

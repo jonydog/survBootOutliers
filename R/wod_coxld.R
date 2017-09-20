@@ -24,7 +24,7 @@ wod_coxld <-  function( surv.object , covariate.data ) {
   time_index   <- ncol(actual_data) - 1
   status_index <- ncol(actual_data) 
   
-  cox_object  <- coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object  <- coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = data.frame(actual_data[,-c(time_index,status_index)]) )
   loglik_baseline <- cox_object$loglik[2]
   
   
@@ -32,7 +32,7 @@ wod_coxld <-  function( surv.object , covariate.data ) {
 
   for(i in 1:nrow(actual_data)){
     
-    cox_fit_i  <- coxph( survival::Surv(actual_data[-i,time_index], as.integer(actual_data[-i,status_index]) ) ~ .   , data = actual_data[-i,-c(time_index,status_index)] )
+    cox_fit_i  <- coxph( survival::Surv(actual_data[-i,time_index], as.integer(actual_data[-i,status_index]) ) ~ .   , data = data.frame(actual_data[-i,-c(time_index,status_index)]) )
     
     lds_vector[i] <- 2*(cox_fit_i$loglik[2]-loglik_baseline)
     

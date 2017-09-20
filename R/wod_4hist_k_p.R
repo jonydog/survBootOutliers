@@ -34,7 +34,7 @@ wod_4hist_k_p <-  function( obs_index, surv.object, covariate.data , nruns  , m 
   
   ## calculate the baseline concordance, according to the baseline (all observations)
   #
-  cox_object <- coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object <- coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = data.frame(actual_data[,-c(time_index,status_index)]) )
   baseline_concordance <- cox_object$concordance[1]/(cox_object$concordance[1] + cox_object$concordance[2] )   
   
   cat("baseline:" , baseline_concordance )

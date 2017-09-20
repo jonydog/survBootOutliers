@@ -13,7 +13,7 @@ wod_coxmartingaleresiduals <- function(surv.object , covariate.data ){
   time_index   <- ncol(actual_data) - 1
   status_index <- ncol(actual_data) 
   
-  cox_object  <- survival::coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = actual_data[,-c(time_index,status_index)] )
+  cox_object  <- survival::coxph( survival::Surv(actual_data[,time_index], as.integer(actual_data[,status_index]) ) ~ .   , data = data.frame(actual_data[,-c(time_index,status_index)]) )
   
   
   

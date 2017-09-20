@@ -24,7 +24,7 @@ survBootOutliers(surv.object, covariate.data, sod.method, B, B.N, max.outliers, 
 }
 \value{
 For all methods, except for "bht" and "dbht", the output is a data.frame object containing the most outlying observations sorted by outlying score.
-For the bootstrap based methods "bht" and "dbht" the output is a list with two elements: "outliers_set" and "histograms".
+For the bootstrap based methods "bht" and "dbht" the output is a list with two elements: "outliers_set" and "histograms". The first contains the list sorted by the most oulying observations. The second one contains the underlying concordance histograms that were used to make the hypothesis test.
 }
 \description{
 Extract the most outlying observations following a criteria based on the bootstrapped concordance with parallel processing
@@ -40,11 +40,7 @@ outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = wha
 
 ## Dual Bootstrap Hypothesis Test "dbht" with 10 bootstrap samples, each with 100 individuals and running on 4 cores
 whas <- get.whas100.dataset()
-outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100 , parallel.param = SnowParam() )
-
-## One Step Deletion "osd" with an amount of 10 for maximum outlier count
-whas <- get.whas100.dataset()
-outliers_osd <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "osd" , max.outliers = 10)
+outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100 , parallel.param = SerialParam() )
 
 ## Likelihood displacement criterion for outlier ranking
 whas <- get.whas100.dataset()
