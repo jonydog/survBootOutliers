@@ -59,7 +59,7 @@ dbht_p <- function( obs_index, s , covariate.data  , B  , B.N  ) {
     poison_concs_vector[i] <- actual_conc - baseline_concordance
     
   }
-  print( paste(B," resamples fit for observation " , obs_index , sep="" ))
+  #print( paste(B," resamples fit for observation " , obs_index , sep="" ))
   
   
   ##

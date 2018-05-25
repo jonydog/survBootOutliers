@@ -34,11 +34,11 @@ summary(whas100_data)
 \subsection{OSD}
 
 <<eval= TRUE , echo=TRUE>>=
-whas <- get.whas100.dataset()
+whass <- get.whas100.dataset()
 outliers_osd <- survBootOutliers( 
-    surv.object=survival::Surv(time = whas$times,event = whas$status ),
-    covariate.data = whas[,2:5] , sod.method = "osd",
-    max.outliers = 10 )
+    surv.object=survival::Surv(time = whass$times,event = whass$status ),
+    covariate.data = whass[,2:5] , sod.method = "osd",
+    max.outliers = 10)
 print(outliers_osd)
 @
 
@@ -51,8 +51,7 @@ outliers_bht <- survBootOutliers(
     covariate.data = whas[,2:5],
     sod.method = "bht",
     B = 10,
-    B.N = 100,
-    parallel.param = SnowParam() )
+    B.N = 100)
 print(outliers_bht)
 @
 
@@ -65,8 +64,7 @@ outliers_dbht <- survBootOutliers(
     covariate.data = whas[,2:5],
     sod.method = "dbht",
     B = 10,
-    B.N = 100,
-    parallel.param = SnowParam() 
+    B.N = 100
 )
 print(outliers_dbht)
 @

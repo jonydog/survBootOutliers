@@ -53,7 +53,7 @@
 #' @import survival
 #' @import stats
 #' @export
-survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=BiocParallel::SerialParam() ){
+survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=NULL ){
   
   ## load library dependencies
   #library(stats)
@@ -77,7 +77,7 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
     stop("Parameter \"covariate.data\" must be of type \"data.frame\".")
   } 
   
-  if( ! methods::is(parallel.param,"BiocParallelParam") ){
+  if( is.null(parallel.param)==FALSE &&  methods::is(parallel.param,"BiocParallelParam")==FALSE ){
     stop("Parameter \"parallel.param\" must be of type \"BiocParallelParam\".")
   }
   
@@ -93,7 +93,7 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   
   if( sod.method=="bht" ){  
       
-    if(HAS_BIOCPARALLEL){
+    if(HAS_BIOCPARALLEL && is.null(parallel.param)==FALSE  ){
       bht_output <- BiocParallel::bplapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N,  BPPARAM = parallel.param )
     }  else {
       bht_output <- lapply(X = 1:N,FUN = wod_4_p, s=surv.object, covariate.data=covariate.data, B=B , B.N=B.N )
@@ -115,7 +115,7 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
 
   if(sod.method=="dbht" ){    
     
-    if(HAS_BIOCPARALLEL){
+    if(HAS_BIOCPARALLEL && is.null(parallel.param)==FALSE   ){
       dbht_out <- BiocParallel::bplapply(X = 1:N, FUN=dbht_p, s=surv.object ,covariate.data = covariate.data , B=B, B.N=B.N, BPPARAM = parallel.param )
     }
     else {

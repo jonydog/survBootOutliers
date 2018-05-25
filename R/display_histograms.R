@@ -8,16 +8,14 @@
 #' 
 #' @examples
 #' whas <- get.whas100.dataset()
-#' using "bht"" as outlier detection method
 #' outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 10 , B.N = 100 , parallel.param = MulticoreParam() )
-#' now display the histogram of observation 67 (for example) for the 
 #' display.obs.histogram(outliers_bht$histograms, "bht", 67)
 #' 
 #' @export
 display.obs.histogram <- function(histograms, type, obs.index){
   
   if( type=='bht' ){
-    graphics::hist(x = as.numeric(histograms[[obs.index]]) , breaks = 100 )
+    graphics::hist(x = as.numeric(histograms[[obs.index]]) , breaks = 1000 )
   }
   
   else if( type=='dbht' ){

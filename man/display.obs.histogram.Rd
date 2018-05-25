@@ -25,12 +25,12 @@ display.obs.histogram(histograms, type, obs.index)
 \examples{
 whas <- get.whas100.dataset()
 ## using "bht"" as outlier detection method
-outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 10 , B.N = 100 , parallel.param = MulticoreParam() )
+outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 10 , B.N = 100  )
 ## now display the histogram of observation 67 (for example) for the 
 display.obs.histogram(outliers_bht$histograms, "bht", 67)
 ## using "dbht"" as outlier detection method
 whas <- get.whas100.dataset()
-outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100 , parallel.param = SerialParam() )
+outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 10 , B.N = 100  )
 ## now display the dual histograms again for observation 67
 display.obs.histogram(outliers_dbht$histograms, "dbht", 67)
 }
