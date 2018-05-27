@@ -12,55 +12,102 @@
 #' @param surv.object An obect of type survival::Surv containing lifetimes and right-censoring status
 #' @param covariate.data A data frame containing the data with covariate values for each individual
 #' @param sod.method One of c("osd","bht","dbht","ld","martingale","deviance")
-#' @param B The number of bootstrap samples generated only applicable for "bht" and "dbht" methods
+#' @param B The number of bootstrap samples generated only applicable for "bht" and "dbht" methods. 
+#'   Typically at least 10x the size of the dataset, ideally should be increased until convergence.
 #' @param B.N the number of observations in each bootstrap sample
 #' @param max.outliers This parameter is only used for the "osd" method   
-#' @param mc.cores The number of cores to execute the methods "bht" and "dbht"
+#' @param parallel.param (Optional) A BiocParallel object, examples: SerialParam(), MulticoreParam()
 #' 
 #' @return For all methods except for "bht" and "dbht" the value returned is a data.frame containing the most outlying observations sorted by outlying score.
-#'         For the "bht" method the value returned is a list of two members: "outlier_set": the most outlygin observations sorted by p-values; "histograms": histogram of concordance variation for each observation.
-#'         For the "dbht" method the value returned is a list of two members: "outlier_set": the most outlygin observations sorted by p-values; "histograms": histogrms of concordance for each observations for the two types of bootstap: "poison" and "antidote".
+#'         For the "bht" method the value returned is a list of two members: 
+#'             "outlier_set": the most outlygin observations sorted by p-values; 
+#'             "histograms": histogram of concordance variation for each observation.
+#'         For the "dbht" method the value returned is a list of two members: 
+#'             "outlier_set": the most outlygin observations sorted by p-values;
+#'            "histograms": histogrms of concordance for each observations for the two types of bootstap: "poison" and "antidote".
 #' 
 #' @examples ## One Step Deletion "osd" method
+#' \donttest{
 #' whas <- get.whas100.dataset()
-#' print(getwd())
-#' outliers_osd <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "osd" , max.outliers = 10 )
+#' print( getwd() )
+#' outliers_osd <- survBootOutliers( 
+#'    surv.object=Surv(time = whas$times,event = whas$status ), 
+#'    covariate.data = whas[,2:5], 
+#'    sod.method = "osd", 
+#'    max.outliers = 5
+#'  )
+#' }
 #' 
-#' @examples ## Bootstrap Hypothesis Test "bht" with 100 bootstrap samples, each with 100 individuals and running on 4 cores
+#' @examples ## Bootstrap Hypothesis Test "bht" with 1000 bootstrap samples, 
+#' ## each with 100 individuals, running without parallelism.
+#' \donttest{  
 #' whas <- get.whas100.dataset()
-#' outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 100 , B.N = 100 , parallel.param = MulticoreParam() )
+#' outliers_bht <- survBootOutliers( 
+#'      surv.object=Surv(time = whas$times,event = whas$status ), 
+#'      covariate.data = whas[,2:5], 
+#'      sod.method = "bht", 
+#'      B = 1000, 
+#'      B.N = 100,
+#'      parallel.param = BiocParallel::MulticoreParam() 
+#' )
+#' }
 #' 
-#' @examples ## Dual Bootstrap Hypothesis Test "dbht" with 100 bootstrap samples, each with 100 individuals and running on 4 cores
-#' whas <- get.whas100.dataset()
-#' outliers_dbht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "dbht" , B = 100 , B.N = 100 , parallel.param = SnowParam() )
-#' 
+#' @examples ## Dual Bootstrap Hypothesis Test "dbht" with 1000 bootstrap samples,
+#' ## each with 50 individuals and running on all available cores.
+#' \donttest{ whas <- get.whas100.dataset()
+#' outliers_dbht <- survBootOutliers( 
+#'    surv.object=Surv(time = whas$times,event = whas$status ), 
+#'    covariate.data = whas[,2:5], 
+#'    sod.method = "dbht",
+#'    B = 1000, 
+#'    B.N = 50,
+#'    parallel.param = BiocParallel::MulticoreParam() 
+#' )
+#' }
 #' @examples ## One Step Deletion "osd" with an amount of 10 for maximum outlier count
 #' whas <- get.whas100.dataset()
-#' outliers_osd <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "osd" , max.outliers = 10)
+#' outliers_osd <- survBootOutliers( 
+#'    surv.object=Surv(time = whas$times,event = whas$status ), 
+#'    covariate.data = whas[,2:5], 
+#'    sod.method = "osd", 
+#'    max.outliers = 10
+#' )
 #' 
 #' @examples ## Likelihood displacement criterion for outlier ranking
 #' whas <- get.whas100.dataset()
-#' outliers_ld <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "ld")
+#' outliers_ld <- survBootOutliers( 
+#'    surv.object=Surv(time = whas$times,event = whas$status ), 
+#'    covariate.data = whas[,2:5], 
+#'    sod.method = "ld"
+#' )
 #' 
 #' @examples ## Cox regression deviance residuals criterion for outlier ranking
 #' whas <- get.whas100.dataset()
-#' outliers_deviance <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "deviance")
+#' outliers_deviance <- survBootOutliers( 
+#'    surv.object=Surv(time = whas$times,event = whas$status ), 
+#'    covariate.data = whas[,2:5], 
+#'    sod.method = "deviance"
+#' )
 #' 
 #' @examples ## Cox regression Martingale residuals criterion for outlier ranking
 #' whas <- get.whas100.dataset()
-#' outliers_martingale <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "martingale")
+#' outliers_martingale <- survBootOutliers( 
+#'    surv.object=Surv(time = whas$times,event = whas$status ), 
+#'    covariate.data = whas[,2:5], 
+#'    sod.method = "martingale"
+#' )
 #'
 #' @import survival
 #' @import stats
 #' @export
-survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, max.outliers, parallel.param=NULL ){
+survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N=NULL, max.outliers, parallel.param=NULL ){
   
   ## load library dependencies
   #library(stats)
   #library(survival)
   
   if( requireNamespace("BiocParallel", quietly = TRUE) ){
-    library(BiocParallel);
+    #library(BiocParallel);
     HAS_BIOCPARALLEL = TRUE;
     print("BiocParallel detected")
   } else {
@@ -70,7 +117,15 @@ survBootOutliers <- function(surv.object, covariate.data, sod.method, B, B.N, ma
   if( ! survival::is.Surv(surv.object) ){
     
     stop("Parameter \"surv.object\" must be an object of type \"survival::Surv\" ")
-}
+  }
+  
+  if(  (sod.method=="bht" || sod.method=="dbht") &&  is.null(B.N) ){
+    B.N=nrow(covariate.data)
+  }
+  
+  if(  (sod.method=="bht" || sod.method=="dbht") &&  B.N > nrow(covariate.data) ){
+    stop("Parameter \"B.N\" cannot be larger than the number of available observations.")
+  }
   
   if( ! base::is.data.frame(covariate.data) ){
     

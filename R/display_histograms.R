@@ -7,9 +7,17 @@
 #' @return No value is returned
 #' 
 #' @examples
+#' \donttest{
 #' whas <- get.whas100.dataset()
-#' outliers_bht <- survBootOutliers( surv.object=Surv(time = whas$times,event = whas$status ) , covariate.data = whas[,2:5] , sod.method = "bht" , B = 10 , B.N = 100 , parallel.param = MulticoreParam() )
+#' outliers_bht <- survBootOutliers( 
+#'       surv.object=Surv(time = whas$times,event = whas$status ), 
+#'      covariate.data = whas[,2:5], 
+#'      sod.method = "bht", 
+#'      B = 2000, B.N = 100 , 
+#'      parallel.param = BiocParallel::MulticoreParam() 
+#' )
 #' display.obs.histogram(outliers_bht$histograms, "bht", 67)
+#' }
 #' 
 #' @export
 display.obs.histogram <- function(histograms, type, obs.index){
